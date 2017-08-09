@@ -5,6 +5,11 @@ TITLE by Andre Kenji Yai
 help you construct your report. Make sure that you remove these notes before
 you finish and submit your project!
 
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 # Load all of the packages that you end up using in your analysis in this code
 # chunk.
@@ -18,23 +23,22 @@ you finish and submit your project!
 # for other code chunks once you have verified that each plot comes out as you
 # want it to. This will clean up the flow of your report.
 
-install.packages('GGally')
-install.packages('scales')
-install.packages('lattice')
-install.packages('MASS')
-install.packages('car')
-install.packages('reshape')
-install.packages('plyr')
+#install.packages('GGally')
+#install.packages('scales')
+#install.packages('lattice')
+#install.packages('MASS')
+#install.packages('car')
+#install.packages('reshape')
+#install.packages('plyr')
 
 library(ggplot2)
 library(GGally)
 library(scales)
-library(gridExtra)
 ```
 
 ```{r echo=FALSE, Load_the_Data}
 # Load the Data
-
+WhiteWines <- read.csv('wineQualityWhites.csv')
 ```
 
 > **Tip**: Before you create any plots, it is a good idea to provide a short
@@ -50,17 +54,205 @@ forget to add a comment after each plot or closely-related group of plots!
 There should be multiple code chunks and text sections; the first one below is
 just to help you get started.
 
+Let's start our analysis by summarizing the data and getting to know more about the dataset.
+
 ```{r echo=FALSE, Univariate_Plots}
-getwd()
-WhiteWines <- read.csv('wineQualityWhites.csv')
-```
-```{r}
-shape(WhiteWines)
+dim(WhiteWines)
 ```
 
+In our dataset there are 4898 rows and 13 features and the features are:
+
+```{r}
+names(WhiteWines)
+```
+
+Let's see the first rows of the dataset
+
+```{r}
+head(WhiteWines,n=10)
+```
+
+We got that our features are numerical and most are double and it seems X the id of the row.
+
+Lets summarize the data to know more about the mean and perticiles of each feature.
 ```{r}
 summary(WhiteWines)
 ```
+
+
+There are two categories of variables in this database:
+
+- continuous: ph, alcohol, sulphates, clorides, free sulfur dioxide, total sulfur dioxide, density, residual sugar and acids,
+- descrite: X, quality.
+
+We also noticed that those with higher variance are alcohol, free sulfur dioxide, total sulfur dioxide, residual sugar. 
+
+We will start analysing the quality that and those variables with high variance
+
+#### Quality
+
+Lets see how the wines were ranked.
+
+```{r}
+
+WineQuality <- table(WhiteWines$quality)
+barplot(WineQuality, main="Wine Quality Distribution", xlab="Number of Wines")
+```
+
+We got that Wine Quality distribution look like a Normal Distribution with the most wines was ranked with a 6 followed by 5 and the lowest received a 3 and the highest a 9.
+
+I wonder what can contribute to that grades? So lets look now at those with higher variance and how they are distributed. 
+
+### Alcohol
+
+```{r}
+qplot(x = alcohol, data = WhiteWines)
+```
+
+
+```{r}
+summary(WhiteWines$alcohol)
+```
+
+We got a left skewed histogram with the most around 10 lowest a 8.00 and the highest at 14.20.
+I wonder if those with more than 10 have a highest ranking of quality.
+
+### Residual sugar
+
+```{r}
+qplot(x = residual.sugar, data = WhiteWines)
+```
+```{r}
+summary(WhiteWines$residual.sugar)
+```
+
+```{r}
+sort(WhiteWines[(WhiteWines$residual.sugar > 20),]$residual.sugar)
+```
+
+We also got a left skewed distribution with most of the data concentrated in less than 20. With the less at 0.60 and highest at 65.800 and second highest at 31.60.
+
+### total sulfur dioxide
+
+```{r}
+qplot(x = total.sulfur.dioxide, data = WhiteWines)
+```
+
+```{r}
+summary(WhiteWines$total.sulfur.dioxide)
+```
+
+It is a normal with it peak near 130, most of the data concentrated between 0-250 and the minimum at 9 and max at 440.
+
+
+# free sulfur
+
+```{r}
+qplot(x = free.sulfur.dioxide, data = WhiteWines)
+```
+
+```{r}
+summary(WhiteWines$free.sulfur.dioxide)
+```
+
+Also a normal with concentration in beetween 0 and 100 and it peak near 50 and min value 
+at 2 and max 289.
+
+
+Lets see the others values as well. I suppose that ph and density may be also correlated.
+
+#### pH
+
+```{r}
+qplot(x=pH, data=WhiteWines)
+```
+
+```{r}
+summary(WhiteWines$pH)
+```
+
+
+We get that all wines are acid (pH < 7) and it has a normal distribution most of it at 3.1
+and min 2.720 and max 3.820.
+
+#### density
+
+```{r}
+qplot(x=density,data=WhiteWines)
+```
+
+
+```{r}
+summary(WhiteWines$density)
+```
+
+It is a normal peak at of it at 0.9937 and min at 0.987 and max near 1.04. It is concentrated at 0.9 to 1.00. 
+
+## Chlorides
+
+Is the amount of salt in the wine. I wonder how this can affect quality.
+
+```{r}
+qplot(x=chlorides,data=WhiteWines)
+```
+
+
+```{r}
+summary(WhiteWines$chlorides)
+```
+
+Is also a normal with peak at 0.043 and it is concentrated between  0.009 and 0,09 and the min is at 0.009 and max at 0.34. I suppose  be the less than 0.04 have best quality,
+
+#### Acids
+Lwts see the acid. There are three types of acids:
+   1 - fixed acidity: most acids involved with wine or fixed or nonvolatile (do not evaporate readily)
+   2 - volatile acidity: the amount of acetic acid in wine, which at too high of levels can lead to an unpleasant, vinegar taste
+    3 - citric acid: found in small quantities, citric acid can add 'freshness' and flavor to wines
+    
+    
+```{r}
+qplot(x=fixed.acidity,data=WhiteWines)
+```
+
+```{r}
+summary(WhiteWines$fixed.acidity)
+```
+
+
+```{r}
+qplot(x=volatile.acidity,data=WhiteWines)
+```
+```{r}
+summary(WhiteWines$volatile.acidity)
+```
+
+```{r}
+qplot(x=citric.acid,data=WhiteWines)
+```
+
+```{r}
+summary(WhiteWines$citric.acid)
+```
+
+Comparasion: TODO
+
+Lets aggregate the acids and see what it returns.
+
+```{r}
+WhiteWines$acid <- WhiteWines$citric.acid + WhiteWines$fixed.acidity + WhiteWines$volatile.acidity
+```
+
+```{r}
+qplot(x=acid,data=WhiteWines)
+```
+
+```{r}
+summary(WhiteWines$acid)
+```
+
+
+
+
 
 
 > **Tip**: Make sure that you leave a blank line between the start / end of

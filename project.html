@@ -119,13 +119,10 @@ $(document).ready(function () {
 </div>
 
 
-<div id="title-by-your_name_here" class="section level1">
-<h1>TITLE by YOUR_NAME_HERE</h1>
+<div id="title-by-andre-kenji-yai" class="section level1">
+<h1>TITLE by Andre Kenji Yai</h1>
 <blockquote>
 <p><strong>Tip</strong>: You will see quoted sections like this throughout the template to help you construct your report. Make sure that you remove these notes before you finish and submit your project!</p>
-</blockquote>
-<blockquote>
-<p><strong>Tip</strong>: One of the requirements of this project is that your code follows good formatting techniques, including limiting your lines to 80 characters or less. If you’re using RStudio, go into Preferences &gt; Code &gt; Display to set up a margin line to help you keep track of this guideline!</p>
 </blockquote>
 <blockquote>
 <p><strong>Tip</strong>: Before you create any plots, it is a good idea to provide a short introduction into the dataset that you are planning to explore. Replace this quoted text with that general information!</p>
@@ -136,6 +133,87 @@ $(document).ready(function () {
 <blockquote>
 <p><strong>Tip</strong>: In this section, you should perform some preliminary exploration of your dataset. Run some summaries of the data and create univariate plots to understand the structure of the individual variables in your dataset. Don’t forget to add a comment after each plot or closely-related group of plots! There should be multiple code chunks and text sections; the first one below is just to help you get started.</p>
 </blockquote>
+<p>Let’s start our analysis by summarizing the data and getting to know more about the dataset.</p>
+<pre><code>## [1] 4898   13</code></pre>
+<p>In our dataset there are 4898 rows and 13 features and the features are:</p>
+<pre class="r"><code>names(WhiteWines)</code></pre>
+<pre><code>##  [1] &quot;X&quot;                    &quot;fixed.acidity&quot;        &quot;volatile.acidity&quot;    
+##  [4] &quot;citric.acid&quot;          &quot;residual.sugar&quot;       &quot;chlorides&quot;           
+##  [7] &quot;free.sulfur.dioxide&quot;  &quot;total.sulfur.dioxide&quot; &quot;density&quot;             
+## [10] &quot;pH&quot;                   &quot;sulphates&quot;            &quot;alcohol&quot;             
+## [13] &quot;quality&quot;</code></pre>
+<p>Let’s see the first rows of the dataset</p>
+<pre class="r"><code>head(WhiteWines,n=10)</code></pre>
+<pre><code>##     X fixed.acidity volatile.acidity citric.acid residual.sugar chlorides
+## 1   1           7.0             0.27        0.36           20.7     0.045
+## 2   2           6.3             0.30        0.34            1.6     0.049
+## 3   3           8.1             0.28        0.40            6.9     0.050
+## 4   4           7.2             0.23        0.32            8.5     0.058
+## 5   5           7.2             0.23        0.32            8.5     0.058
+## 6   6           8.1             0.28        0.40            6.9     0.050
+## 7   7           6.2             0.32        0.16            7.0     0.045
+## 8   8           7.0             0.27        0.36           20.7     0.045
+## 9   9           6.3             0.30        0.34            1.6     0.049
+## 10 10           8.1             0.22        0.43            1.5     0.044
+##    free.sulfur.dioxide total.sulfur.dioxide density   pH sulphates alcohol
+## 1                   45                  170  1.0010 3.00      0.45     8.8
+## 2                   14                  132  0.9940 3.30      0.49     9.5
+## 3                   30                   97  0.9951 3.26      0.44    10.1
+## 4                   47                  186  0.9956 3.19      0.40     9.9
+## 5                   47                  186  0.9956 3.19      0.40     9.9
+## 6                   30                   97  0.9951 3.26      0.44    10.1
+## 7                   30                  136  0.9949 3.18      0.47     9.6
+## 8                   45                  170  1.0010 3.00      0.45     8.8
+## 9                   14                  132  0.9940 3.30      0.49     9.5
+## 10                  28                  129  0.9938 3.22      0.45    11.0
+##    quality
+## 1        6
+## 2        6
+## 3        6
+## 4        6
+## 5        6
+## 6        6
+## 7        6
+## 8        6
+## 9        6
+## 10       6</code></pre>
+<p>We got that our features are numerical and most are double and it seems X the id of the row.</p>
+<p>Lets summarize the data to know more about the mean and perticiles of each feature.</p>
+<pre class="r"><code>summary(WhiteWines)</code></pre>
+<pre><code>##        X        fixed.acidity    volatile.acidity  citric.acid    
+##  Min.   :   1   Min.   : 3.800   Min.   :0.0800   Min.   :0.0000  
+##  1st Qu.:1225   1st Qu.: 6.300   1st Qu.:0.2100   1st Qu.:0.2700  
+##  Median :2450   Median : 6.800   Median :0.2600   Median :0.3200  
+##  Mean   :2450   Mean   : 6.855   Mean   :0.2782   Mean   :0.3342  
+##  3rd Qu.:3674   3rd Qu.: 7.300   3rd Qu.:0.3200   3rd Qu.:0.3900  
+##  Max.   :4898   Max.   :14.200   Max.   :1.1000   Max.   :1.6600  
+##  residual.sugar     chlorides       free.sulfur.dioxide
+##  Min.   : 0.600   Min.   :0.00900   Min.   :  2.00     
+##  1st Qu.: 1.700   1st Qu.:0.03600   1st Qu.: 23.00     
+##  Median : 5.200   Median :0.04300   Median : 34.00     
+##  Mean   : 6.391   Mean   :0.04577   Mean   : 35.31     
+##  3rd Qu.: 9.900   3rd Qu.:0.05000   3rd Qu.: 46.00     
+##  Max.   :65.800   Max.   :0.34600   Max.   :289.00     
+##  total.sulfur.dioxide    density             pH          sulphates     
+##  Min.   :  9.0        Min.   :0.9871   Min.   :2.720   Min.   :0.2200  
+##  1st Qu.:108.0        1st Qu.:0.9917   1st Qu.:3.090   1st Qu.:0.4100  
+##  Median :134.0        Median :0.9937   Median :3.180   Median :0.4700  
+##  Mean   :138.4        Mean   :0.9940   Mean   :3.188   Mean   :0.4898  
+##  3rd Qu.:167.0        3rd Qu.:0.9961   3rd Qu.:3.280   3rd Qu.:0.5500  
+##  Max.   :440.0        Max.   :1.0390   Max.   :3.820   Max.   :1.0800  
+##     alcohol         quality     
+##  Min.   : 8.00   Min.   :3.000  
+##  1st Qu.: 9.50   1st Qu.:5.000  
+##  Median :10.40   Median :6.000  
+##  Mean   :10.51   Mean   :5.878  
+##  3rd Qu.:11.40   3rd Qu.:6.000  
+##  Max.   :14.20   Max.   :9.000</code></pre>
+<p>There are two categories of variables in this database:</p>
+<ul>
+<li>continuous: ph, alcohol, sulphates, clorides, free sulfur dioxide, total sulfur dioxide, density, residual sugar and acids,</li>
+<li>descrite: X, quality.</li>
+</ul>
+<p>We also noticed from the summarie above that while ph, sulphates have very low variance alcohol, free sulfur dioxide, total sulfur dioxide, residual sugar have a much larger variance.</p>
 <blockquote>
 <p><strong>Tip</strong>: Make sure that you leave a blank line between the start / end of each code block and the end / start of your Markdown text so that it is formatted nicely in the knitted text. Note as well that text on consecutive lines is treated as a single space. Make sure you have a blank line between your paragraphs so that they too are formatted for easy readability.</p>
 </blockquote>
