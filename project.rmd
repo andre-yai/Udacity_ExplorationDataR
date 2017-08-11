@@ -105,6 +105,8 @@ I wonder what can contribute to that grades? So lets look now at those with high
 
 ### Alcohol
 
+The porcentage of alcohol content of the wine.
+
 ```{r}
 qplot(x = alcohol, data = WhiteWines)
 ```
@@ -119,6 +121,8 @@ I wonder if those with more than 10 have a highest ranking of quality.
 
 ### Residual sugar
 
+The amount of sugar remaining after fermentation stops, it's rare to find wines with less than 1 gram/liter and wines with greater than 45 grams/liter are considered sweet
+
 ```{r}
 qplot(x = residual.sugar, data = WhiteWines)
 ```
@@ -127,12 +131,17 @@ summary(WhiteWines$residual.sugar)
 ```
 
 ```{r}
-sort(WhiteWines[(WhiteWines$residual.sugar > 20),]$residual.sugar)
+length(WhiteWines[(WhiteWines$residual.sugar < 1),]$residual.sugar)
+length(WhiteWines[(WhiteWines$residual.sugar > 45),]$residual.sugar)
 ```
 
-We also got a left skewed distribution with most of the data concentrated in less than 20. With the less at 0.60 and highest at 65.800 and second highest at 31.60.
+We also got a left skewed distribution with most of the data concentrated in less than 20 g/L. With the less at 0.60 and highest at 65.800 g/L and second highest at 31.60 g/L.
+
+That been investigated we got that we have 77 less than 1 and 1 wine with residual sugar more than 45 g/L.
 
 ### total sulfur dioxide
+
+Amount of free and bound forms of S02; in low concentrations, SO2 is mostly undetectable in wine, but at free SO2 concentrations over 50 ppm, SO2 becomes evident in the nose and taste of wine
 
 ```{r}
 qplot(x = total.sulfur.dioxide, data = WhiteWines)
@@ -142,10 +151,18 @@ qplot(x = total.sulfur.dioxide, data = WhiteWines)
 summary(WhiteWines$total.sulfur.dioxide)
 ```
 
-It is a normal with it peak near 130, most of the data concentrated between 0-250 and the minimum at 9 and max at 440.
+It is a normal with it peak near 130 ppm, most of the data concentrated between 0-250 ppm and the minimum at 9 ppm and max at 440ppm.
 
 
-# free sulfur
+```{r}
+length(WhiteWines[(WhiteWines$total.sulfur.dioxide > 50),]$total.sulfur.dioxide)/length(WhiteWines$total.sulfur.dioxide)
+```
+
+We also got that around 98.9% of the dataset have a more the SO2 more present in the wine. 
+
+# free sulfur dioxide
+
+The free form of SO2 exists in equilibrium between molecular SO2 (as a dissolved gas) and bisulfite ion; it prevents microbial growth and the oxidation of wine.
 
 ```{r}
 qplot(x = free.sulfur.dioxide, data = WhiteWines)
@@ -163,6 +180,9 @@ Lets see the others values as well. I suppose that ph and density may be also co
 
 #### pH
 
+Describes how acidic or basic a wine is on a scale from 0 (very acidic) to 14 (very basic); most wines are between 3-4 on the pH scale
+
+
 ```{r}
 qplot(x=pH, data=WhiteWines)
 ```
@@ -175,7 +195,9 @@ summary(WhiteWines$pH)
 We get that all wines are acid (pH < 7) and it has a normal distribution most of it at 3.1
 and min 2.720 and max 3.820.
 
-#### density
+#### Density
+
+The density of water is close to that of water depending on the percent alcohol and sugar content.
 
 ```{r}
 qplot(x=density,data=WhiteWines)
@@ -186,7 +208,7 @@ qplot(x=density,data=WhiteWines)
 summary(WhiteWines$density)
 ```
 
-It is a normal peak at of it at 0.9937 and min at 0.987 and max near 1.04. It is concentrated at 0.9 to 1.00. 
+It is a normal peak at of it at 0.9937 and min at 0.987 and max near 1.04. It is concentrated at 0.9 to 1.00. That means that density of most wines are very near to the water density, that is 1.
 
 ## Chlorides
 
@@ -203,7 +225,26 @@ summary(WhiteWines$chlorides)
 
 Is also a normal with peak at 0.043 and it is concentrated between  0.009 and 0,09 and the min is at 0.009 and max at 0.34. I suppose  be the less than 0.04 have best quality,
 
+
+#### Sulphates
+
+A wine additive which can contribute to sulfur dioxide gas (S02) levels, wich acts as an antimicrobial and antioxidant
+
+
+```{r}
+qplot(x=sulphates,data=WhiteWines)
+```
+
+
+```{r}
+summary(WhiteWines$sulphates)
+```
+
+We got a binormal with peaks near 0.4 and 0.5. Min value is 0.2 and max 1.08.
+
+
 #### Acids
+
 Lwts see the acid. There are three types of acids:
    1 - fixed acidity: most acids involved with wine or fixed or nonvolatile (do not evaporate readily)
    2 - volatile acidity: the amount of acetic acid in wine, which at too high of levels can lead to an unpleasant, vinegar taste
@@ -234,7 +275,10 @@ qplot(x=citric.acid,data=WhiteWines)
 summary(WhiteWines$citric.acid)
 ```
 
-Comparasion: TODO
+Comparasion:
+
+In all of them we got a normal. We have more fixed acid than the others and it peak is in 7 when the other is in 0.3 and with a higher variance.
+
 
 Lets aggregate the acids and see what it returns.
 
@@ -289,14 +333,77 @@ yourself to relationships between a main output feature and one of the
 supporting variables. Try to look at relationships between supporting variables
 as well.
 
-```{r echo=FALSE, Bivariate_Plots}
+We will now see the correlation matrix. To see wich variables are correlated to quality and each other.
 
+```{r}
+correlation_matrix <- cor(WhiteWines)
+round(correlation_matrix,2)
+```
+
+Looking more carefully with the row quality we got that quality is positivly and more correlated to alcohol. Other feature that is correlated but negatively is with density and clorides.
+
+```{r}
+sort(correlation_matrix[13,])
+```
+
+Lets  see a visualization of this matrix.
+
+```{r echo=FALSE, Bivariate_Plots}
+library(psych)
+pairs.panels(WhiteWines, 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+             )
 ```
 
 # Bivariate Analysis
 
 > **Tip**: As before, summarize what you found in your bivariate explorations
 here. Use the questions below to guide your discussion.
+
+
+Lets take a closer look at the relation between alcohol and density with quality.
+
+```{r}
+WhiteWines$Qualitycat<-as.factor(WhiteWines$quality)
+```
+
+
+```{r}
+ggplot(aes(y = alcohol,x = Qualitycat),data = WhiteWines) + geom_boxplot() + geom_smooth(method = 'lm')
+```
+
+```{r}
+tapply(WhiteWines$alcohol,WhiteWines$Qualitycat, summary)
+```
+
+We see that as alcohol in the wines increases the quality tend to increase as well and that with alcohol percentage more than 10.8 tend to have better quality.
+Now lets take a look at density.
+
+```{r}
+ggplot(aes(x = Qualitycat, y = density),data = WhiteWines) + geom_boxplot(color = '#F79420')
+```
+
+
+```{r}
+tapply(WhiteWines$density,WhiteWines$Qualitycat, summary)
+```
+
+It seems that low density tend to a better quality. As it goes to near 0.99 it's Quality tend to increases.
+
+Now let us compare to chorlides.
+
+
+```{r}
+ggplot(aes(x = Qualitycat, y = chlorides),data = WhiteWines) + geom_boxplot(color = '#F79420')
+```
+
+
+
+
+
 
 ### Talk about some of the relationships you observed in this part of the \
 investigation. How did the feature(s) of interest vary with other features in \
