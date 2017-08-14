@@ -1,9 +1,5 @@
-TITLE by Andre Kenji Yai
+White Wines Quality Analysis by Andre Kenji Yai
 ========================================================
-
-> **Tip**: You will see quoted sections like this throughout the template to
-help you construct your report. Make sure that you remove these notes before
-you finish and submit your project!
 
 ```{r setup, include=FALSE}
 chooseCRANmirror(graphics=FALSE, ind=1)
@@ -41,18 +37,51 @@ library(scales)
 WhiteWines <- read.csv('wineQualityWhites.csv')
 ```
 
-> **Tip**: Before you create any plots, it is a good idea to provide a short
-introduction into the dataset that you are planning to explore. Replace this
-quoted text with that general information!
+# Description 
+
+  P. Cortez, A. Cerdeira, F. Almeida, T. Matos and J. Reis. 
+  Modeling wine preferences by data mining from physicochemical properties.
+  In Decision Support Systems, Elsevier, 47(4):547-553. ISSN: 0167-9236.
+
+  In the above reference, two datasets were created, using red and white wine samples.
+  The inputs include objective tests (e.g. PH values) and the output is based on sensory data
+  (median of at least 3 evaluations made by wine experts). Each expert graded the wine quality 
+  between 0 (very bad) and 10 (very excellent). Several data mining methods were applied to model
+  these datasets under a regression approach. The support vector machine model achieved the
+  best results. Several metrics were computed: MAD, confusion matrix for a fixed error tolerance (T),
+  etc. Also, we plot the relative importances of the input variables (as measured by a sensitivity  analysis procedure).
+  
+  Number of Attributes: 11 + output attribute
+  
+   Note: several of the attributes may be correlated, thus it makes sense to apply some sort of
+   feature selection.
+
+  Attribute information:
+
+   For more information, read [Cortez et al., 2009].
+
+   Input variables (based on physicochemical tests):
+    - 1.  fixed acidity (tartaric acid - g / dm^3)
+    - 2. volatile acidity (acetic acid - g / dm^3)
+    - 3. citric acid (g / dm^3)
+    - 4. residual sugar (g / dm^3)
+    - 5. chlorides (sodium chloride - g / dm^3
+    - 6. free sulfur dioxide (mg / dm^3)
+    - 7. total sulfur dioxide (mg / dm^3)
+    - 8. density (g / cm^3)
+    - 9. pH
+    - 10. sulphates (potassium sulphate - g / dm3)
+    - 11. alcohol (% by volume)
+    Output variable (based on sensory data): 
+    - 12. quality (score between 0 and 10)
+
+# The Problem
+
+  We will analiyze the dataset to investigate the features that makes a good wine. In this problem we will use the White Wine dataset. 
 
 # Univariate Plots Section
 
-> **Tip**: In this section, you should perform some preliminary exploration of
-your dataset. Run some summaries of the data and create univariate plots to
-understand the structure of the individual variables in your dataset. Don't
-forget to add a comment after each plot or closely-related group of plots!
-There should be multiple code chunks and text sections; the first one below is
-just to help you get started.
+In this section, I will perform some preliminary exploration of your dataset.
 
 Let's start our analysis by summarizing the data and getting to know more about the dataset.
 
@@ -89,7 +118,8 @@ We also noticed that those with higher variance are alcohol, free sulfur dioxide
 
 We will start analysing the quality that and those variables with high variance
 
-#### Quality
+
+### Quality
 
 Lets see how the wines were ranked.
 
@@ -99,9 +129,18 @@ WineQuality <- table(WhiteWines$quality)
 barplot(WineQuality, main="Wine Quality Distribution", xlab="Number of Wines")
 ```
 
+
 We got that Wine Quality distribution look like a Normal Distribution with the most wines was ranked with a 6 followed by 5 and the lowest received a 3 and the highest a 9.
 
 I wonder what can contribute to that grades? So lets look now at those with higher variance and how they are distributed. 
+
+As we have a descrite and specific set of values assigned to  quality, I will factorize this feature. Doing so it will help us in the visualization by allowing us to perform better boxplots and investigate relationship of features.
+
+```{r}
+WhiteWines$QualityCategory <-as.factor(WhiteWines$quality)
+```
+
+
 
 ### Alcohol
 
@@ -119,7 +158,7 @@ summary(WhiteWines$alcohol)
 We got a left skewed histogram with the most around 10 lowest a 8.00 and the highest at 14.20.
 I wonder if those with more than 10 have a highest ranking of quality.
 
-### Residual sugar
+### Residual Sugar
 
 The amount of sugar remaining after fermentation stops, it's rare to find wines with less than 1 gram/liter and wines with greater than 45 grams/liter are considered sweet
 
@@ -139,7 +178,19 @@ We also got a left skewed distribution with most of the data concentrated in les
 
 That been investigated we got that we have 77 less than 1 and 1 wine with residual sugar more than 45 g/L.
 
-### total sulfur dioxide
+```{r}
+WhiteWines$log10.residual.sugar <- log10( WhiteWines$residual.sugar)
+qplot(x = log10.residual.sugar, data = WhiteWines)
+```
+
+```{r}
+summary(WhiteWines$log10.residual.sugar)
+```
+
+I transformed the long tail data to better understang the distribution of residual sugar. The residual sugar appears bimodal with the peaks in 0.25 and 0.8.
+
+
+### Total Sulfur Dioxide
 
 Amount of free and bound forms of S02; in low concentrations, SO2 is mostly undetectable in wine, but at free SO2 concentrations over 50 ppm, SO2 becomes evident in the nose and taste of wine
 
@@ -160,7 +211,7 @@ length(WhiteWines[(WhiteWines$total.sulfur.dioxide > 50),]$total.sulfur.dioxide)
 
 We also got that around 98.9% of the dataset have a more the SO2 more present in the wine. 
 
-# free sulfur dioxide
+### Free Sulfur Dioxide
 
 The free form of SO2 exists in equilibrium between molecular SO2 (as a dissolved gas) and bisulfite ion; it prevents microbial growth and the oxidation of wine.
 
@@ -178,7 +229,7 @@ at 2 and max 289.
 
 Lets see the others values as well. I suppose that ph and density may be also correlated.
 
-#### pH
+### PH
 
 Describes how acidic or basic a wine is on a scale from 0 (very acidic) to 14 (very basic); most wines are between 3-4 on the pH scale
 
@@ -195,7 +246,7 @@ summary(WhiteWines$pH)
 We get that all wines are acid (pH < 7) and it has a normal distribution most of it at 3.1
 and min 2.720 and max 3.820.
 
-#### Density
+### Density
 
 The density of water is close to that of water depending on the percent alcohol and sugar content.
 
@@ -210,7 +261,7 @@ summary(WhiteWines$density)
 
 It is a normal peak at of it at 0.9937 and min at 0.987 and max near 1.04. It is concentrated at 0.9 to 1.00. That means that density of most wines are very near to the water density, that is 1.
 
-## Chlorides
+### Chlorides
 
 Is the amount of salt in the wine. I wonder how this can affect quality.
 
@@ -226,7 +277,7 @@ summary(WhiteWines$chlorides)
 Is also a normal with peak at 0.043 and it is concentrated between  0.009 and 0,09 and the min is at 0.009 and max at 0.34. I suppose  be the less than 0.04 have best quality,
 
 
-#### Sulphates
+### Sulphates
 
 A wine additive which can contribute to sulfur dioxide gas (S02) levels, wich acts as an antimicrobial and antioxidant
 
@@ -243,7 +294,7 @@ summary(WhiteWines$sulphates)
 We got a binormal with peaks near 0.4 and 0.5. Min value is 0.2 and max 1.08.
 
 
-#### Acids
+### Acids
 
 Lwts see the acid. There are three types of acids:
    1 - fixed acidity: most acids involved with wine or fixed or nonvolatile (do not evaporate readily)
@@ -279,7 +330,6 @@ Comparasion:
 
 In all of them we got a normal. We have more fixed acid than the others and it peak is in 7 when the other is in 0.3 and with a higher variance.
 
-
 Lets aggregate the acids and see what it returns.
 
 ```{r}
@@ -294,35 +344,45 @@ qplot(x=acid,data=WhiteWines)
 summary(WhiteWines$acid)
 ```
 
+When analyzing the new feature we got that it is more similar to fixed aciity with it peak at 7.5.
 
-
-
-
-
-> **Tip**: Make sure that you leave a blank line between the start / end of
-each code block and the end / start of your Markdown text so that it is
-formatted nicely in the knitted text. Note as well that text on consecutive
-lines is treated as a single space. Make sure you have a blank line between
-your paragraphs so that they too are formatted for easy readability.
-
-# Univariate Analysis
-
-> **Tip**: Now that you've completed your univariate explorations, it's time to
-reflect on and summarize what you've found. Use the questions below to help you
-gather your observations and add your own if you have other thoughts!
+### Univariate Analysis
 
 ### What is the structure of your dataset?
 
+TODO:
+
+In my dataset there are ... values with ... features (quality, residual.sugar,sulphate,fixed.acid,t).
+
+From our observations:
+
+- quality:
+- alcohol:
+- density:
+- residual sugar:
+- ph:
+- chlorides:
+
 ### What is/are the main feature(s) of interest in your dataset?
+
+TODO: Make a search.
+
+The main features in the dataset are quality,alcohol and density I'd like to determine which features are better to predict the quality of a wine. I suspect that a combination of density, alcohol and others features can contribute for it.
 
 ### What other features in the dataset do you think will help support your \
 investigation into your feature(s) of interest?
 
+Residual sugar,chlorides,ph,sulphates and others my contribute to the quality of a wine. 
+
 ### Did you create any new variables from existing variables in the dataset?
+
+I created three differente features one for factorizing the quality of the wine, other by transfoming the residual sugar feature to log10 and other by combining the three different acids (fixed, volative and citric). I did so in other to better visualize the relations between the differents features.
 
 ### Of the features you investigated, were there any unusual distributions? \
 Did you perform any operations on the data to tidy, adjust, or change the form \
 of the data? If so, why did you do this?
+
+The residual sugar had a left skewed plot so I tried the log10 transformation and got a binormal distribution.
 
 
 # Bivariate Plots Section
@@ -335,8 +395,9 @@ as well.
 
 We will now see the correlation matrix. To see wich variables are correlated to quality and each other.
 
+
 ```{r}
-correlation_matrix <- cor(WhiteWines)
+correlation_matrix <- cor(WhiteWines[,c(1:13,15,16)])
 round(correlation_matrix,2)
 ```
 
@@ -358,32 +419,65 @@ pairs.panels(WhiteWines,
              )
 ```
 
+
 # Bivariate Analysis
 
-> **Tip**: As before, summarize what you found in your bivariate explorations
-here. Use the questions below to guide your discussion.
+Analyzing the covariation map we got that most important ones are:
 
+  - density and residual sugar (0.84)
+  - alcohol and density (0.78)
+  - total sulfur dioxide and density (0.62)
+  - Quality and alcohol (0.44)
+  - Quality and density (-0.33)
+  
+
+### Density and residual sugar
+  
+  We got by a correlation of 0.84
+  
+```{r}
+ggplot(aes(y = density,x = residual.sugar),data = WhiteWines) + geom_point(alpha=0.5, size=1,position='jitter') + geom_smooth(method = 'lm')
+```
+
+We got almost like a linear correlation between the residual sugar and density points. That shows us that as density increases the residual.sugar also increase.
+
+## Density and Alcohol
+
+```{r}
+ggplot(aes(y = density,x = alcohol),data = WhiteWines) + geom_point(alpha=0.5, size=1,position='jitter') + geom_smooth(method = 'lm') + scale_y_continuous(limits = c(0.98,1.04))
+```
+
+We can see that as alcohol increases there are less density.
+
+### total sulfur dioxide and density
+
+```{r}
+ggplot(aes(y = density, x = total.sulfur.dioxide),data = WhiteWines) + geom_point(alpha=0.5, size=1,position='jitter') + geom_smooth(method = 'lm') + scale_y_continuous(limits = c(0.98,1.04))
+```
+
+
+## Quality Multivariate plots
+
+### Quality and Alcohol
 
 Lets take a closer look at the relation between alcohol and density with quality.
 
 ```{r}
-WhiteWines$Qualitycat<-as.factor(WhiteWines$quality)
-```
-
-
-```{r}
-ggplot(aes(y = alcohol,x = Qualitycat),data = WhiteWines) + geom_boxplot() + geom_smooth(method = 'lm')
+ggplot(aes(y = alcohol,x = QualityCategory),data = WhiteWines) + geom_boxplot() + geom_smooth(method = 'lm')
 ```
 
 ```{r}
 tapply(WhiteWines$alcohol,WhiteWines$Qualitycat, summary)
 ```
 
+
+### Quality and density
+
 We see that as alcohol in the wines increases the quality tend to increase as well and that with alcohol percentage more than 10.8 tend to have better quality.
 Now lets take a look at density.
 
 ```{r}
-ggplot(aes(x = Qualitycat, y = density),data = WhiteWines) + geom_boxplot(color = '#F79420')
+ggplot(aes(x = QualityCategory, y = density),data = WhiteWines) + geom_boxplot()
 ```
 
 
@@ -392,17 +486,6 @@ tapply(WhiteWines$density,WhiteWines$Qualitycat, summary)
 ```
 
 It seems that low density tend to a better quality. As it goes to near 0.99 it's Quality tend to increases.
-
-Now let us compare to chorlides.
-
-
-```{r}
-ggplot(aes(x = Qualitycat, y = chlorides),data = WhiteWines) + geom_boxplot(color = '#F79420')
-```
-
-
-
-
 
 
 ### Talk about some of the relationships you observed in this part of the \
@@ -425,8 +508,18 @@ you plan on creating any mathematical models, this is the section where you
 will do that.
 
 ```{r echo=FALSE, Multivariate_Plots}
-
+ggplot(aes(y = density,x = alcohol),data = WhiteWines) + geom_point(aes(color=QualityCategory),alpha=0.5, size=1,position='jitter') + geom_smooth(method = 'lm') + scale_y_continuous(limits = c(0.985,1.00))
 ```
+
+
+```{r echo=FALSE}
+p <- ggplot(aes(y = density,x = alcohol,color= QualityCategory),data = WhiteWines) + geom_point(alpha=0.5, size=0.2,position='jitter') + scale_y_continuous(limits = c(0.985,1.00))
+p + facet_grid(QualityCategory ~ ., scales="free")+ ggtitle('Density by Alcohol in differents Qualities')
+```
+
+In this plot woucan see that as the quality increases there are more alcohol at higher levels and lower densities.
+
+
 
 # Multivariate Analysis
 
@@ -452,6 +545,7 @@ units), and good aesthetic choices (e.g. color, transparency). After each plot,
 make sure you justify why you chose each plot by describing what it shows.
 
 ### Plot One
+Category plot
 ```{r echo=FALSE, Plot_One}
 
 ```
@@ -460,6 +554,7 @@ make sure you justify why you chose each plot by describing what it shows.
 
 
 ### Plot Two
+Category and Alcohol plot
 ```{r echo=FALSE, Plot_Two}
 
 ```
@@ -468,6 +563,7 @@ make sure you justify why you chose each plot by describing what it shows.
 
 
 ### Plot Three
+Category and Alcohol and Density plot
 ```{r echo=FALSE, Plot_Three}
 
 ```
