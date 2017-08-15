@@ -124,7 +124,6 @@ We will start analysing the quality that and those variables with high variance
 Lets see how the wines were ranked.
 
 ```{r}
-
 WineQuality <- table(WhiteWines$quality)
 barplot(WineQuality, main="Wine Quality Distribution", xlab="Number of Wines")
 ```
@@ -352,16 +351,16 @@ When analyzing the new feature we got that it is more similar to fixed aciity wi
 
 TODO:
 
-In my dataset there are ... values with ... features (quality, residual.sugar,sulphate,fixed.acid,t).
+In my dataset there are 4898 values with 13 features (quality, residual.sugar,sulphate,fixed.acid,t).
 
 From our observations:
 
-- quality:
-- alcohol:
-- density:
-- residual sugar:
-- ph:
-- chlorides:
+- quality: There were more wines with quality equal to 6.
+- alcohol: Alcohol have a binormal distribution peaks on 9% and 11% 
+- density: Nomal distribution concentrated betwwen 0.99 to 1.00.
+- residual sugar: Got a left skewed distribution than transformed to log10 and got a binormal with peaks at 0.25 and 0.9.
+- ph: All wines are acids and had a normal distriution and peak at 3.2 
+- chlorides: A normal distribution and concentrated beetween 0.02 to 0.09
 
 ### What is/are the main feature(s) of interest in your dataset?
 
@@ -387,14 +386,7 @@ The residual sugar had a left skewed plot so I tried the log10 transformation an
 
 # Bivariate Plots Section
 
-> **Tip**: Based on what you saw in the univariate plots, what relationships
-between variables might be interesting to look at in this section? Don't limit
-yourself to relationships between a main output feature and one of the
-supporting variables. Try to look at relationships between supporting variables
-as well.
-
 We will now see the correlation matrix. To see wich variables are correlated to quality and each other.
-
 
 ```{r}
 correlation_matrix <- cor(WhiteWines[,c(1:13,15,16)])
@@ -447,7 +439,7 @@ We got almost like a linear correlation between the residual sugar and density p
 ggplot(aes(y = density,x = alcohol),data = WhiteWines) + geom_point(alpha=0.5, size=1,position='jitter') + geom_smooth(method = 'lm') + scale_y_continuous(limits = c(0.98,1.04))
 ```
 
-We can see that as alcohol increases there are less density.
+We can see that as alcohol increases there are less density. We can also get that the range of density is from 0.98 to 1.04 and alcohol range goes from 8 to 14.
 
 ### total sulfur dioxide and density
 
@@ -455,8 +447,11 @@ We can see that as alcohol increases there are less density.
 ggplot(aes(y = density, x = total.sulfur.dioxide),data = WhiteWines) + geom_point(alpha=0.5, size=1,position='jitter') + geom_smooth(method = 'lm') + scale_y_continuous(limits = c(0.98,1.04))
 ```
 
+We got that  alsmost as density increases the total sulfur dioxide also increase.
 
 ## Quality Multivariate plots
+
+In this part we will create a plot that involves the quality of wines.
 
 ### Quality and Alcohol
 
@@ -467,14 +462,15 @@ ggplot(aes(y = alcohol,x = QualityCategory),data = WhiteWines) + geom_boxplot() 
 ```
 
 ```{r}
-tapply(WhiteWines$alcohol,WhiteWines$Qualitycat, summary)
+tapply(WhiteWines$alcohol,WhiteWines$Quality, summary)
 ```
 
+We see that as alcohol in the wines increases the quality tend to increase as well and that with alcohol percentage more than 10.8 tend to have better quality.
+Now lets take a look at density
 
 ### Quality and density
 
-We see that as alcohol in the wines increases the quality tend to increase as well and that with alcohol percentage more than 10.8 tend to have better quality.
-Now lets take a look at density.
+Density is another feature that may have a correlation to quality. Lets analyse that correlation.
 
 ```{r}
 ggplot(aes(x = QualityCategory, y = density),data = WhiteWines) + geom_boxplot()
@@ -482,30 +478,44 @@ ggplot(aes(x = QualityCategory, y = density),data = WhiteWines) + geom_boxplot()
 
 
 ```{r}
-tapply(WhiteWines$density,WhiteWines$Qualitycat, summary)
+tapply(WhiteWines$density,WhiteWines$Quality, summary)
 ```
 
 It seems that low density tend to a better quality. As it goes to near 0.99 it's Quality tend to increases.
 
 
+### Quality and Clorides
+
+According to the matrix of correlation clorides also have a correlation with quality.
+
+```{r}
+ggplot(aes(x = QualityCategory, y = chlorides),data = WhiteWines) + geom_boxplot()
+```
+
+
+```{r}
+tapply(WhiteWines$chlorides,WhiteWines$Quality, summary)
+```
+
+As it shown in density, the clorides as it get lower than 0.02 it tend to have better quality.
+
 ### Talk about some of the relationships you observed in this part of the \
 investigation. How did the feature(s) of interest vary with other features in \
 the dataset?
 
+I noticed some relationships with quality of wines that are higher alcohol, lower density and loweer clorides tend to have a better quality.
+
 ### Did you observe any interesting relationships between the other features \
 (not the main feature(s) of interest)?
 
+I noticed some relationships in the dataset. Density is increases proportionaly to residual sugar and sulfur dioxide but inverse proportionaly to alcohol. 
+
 ### What was the strongest relationship you found?
 
+We got that as the density increases so do residual sugar and sulfur dioxide but inverse proportinaly to alcohol.
 
 # Multivariate Plots Section
 
-> **Tip**: Now it's time to put everything together. Based on what you found in
-the bivariate plots section, create a few multivariate plots to investigate
-more complex interactions between variables. Make sure that the plots that you
-create here are justified by the plots you explored in the previous section. If
-you plan on creating any mathematical models, this is the section where you
-will do that.
 
 ```{r echo=FALSE, Multivariate_Plots}
 ggplot(aes(y = density,x = alcohol),data = WhiteWines) + geom_point(aes(color=QualityCategory),alpha=0.5, size=1,position='jitter') + geom_smooth(method = 'lm') + scale_y_continuous(limits = c(0.985,1.00))
@@ -517,8 +527,16 @@ p <- ggplot(aes(y = density,x = alcohol,color= QualityCategory),data = WhiteWine
 p + facet_grid(QualityCategory ~ ., scales="free")+ ggtitle('Density by Alcohol in differents Qualities')
 ```
 
-In this plot woucan see that as the quality increases there are more alcohol at higher levels and lower densities.
+In this plot you can see that as the quality increases there are more alcohol at higher levels and lower densities.
 
+
+# Alcohol and cholrides
+```{r echo=FALSE}
+p <- ggplot(aes(y = chlorides,x = alcohol,color= QualityCategory),data = WhiteWines) + geom_point(alpha=0.5, size=0.2,position='jitter')
+p + facet_grid(QualityCategory ~ ., scales="free")+ ggtitle('Chlorides  by Alcohol in differents Qualities')
+```
+
+As shown with the density, as the clhorides increases there are more alcohol at higher levels and lower densities.
 
 
 # Multivariate Analysis
@@ -526,8 +544,10 @@ In this plot woucan see that as the quality increases there are more alcohol at 
 ### Talk about some of the relationships you observed in this part of the \
 investigation. Were there features that strengthened each other in terms of \
 looking at your feature(s) of interest?
-
 ### Were there any interesting or surprising interactions between features?
+
+The features that are strong related are alchol and quality and inversaly related to chlorides.
+
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the \
 strengths and limitations of your model.
@@ -547,37 +567,44 @@ make sure you justify why you chose each plot by describing what it shows.
 ### Plot One
 Category plot
 ```{r echo=FALSE, Plot_One}
+WineQuality <- table(WhiteWines$quality)
+barplot(WineQuality, main="Wine Quality Distribution", xlab="Number of Wines")
 
 ```
 
 ### Description One
 
+The wines were graded from 0 to 10 and the minimum got 3 and maximum 9. The distribution also got a shape of a normal with it peak at 6.
 
 ### Plot Two
 Category and Alcohol plot
 ```{r echo=FALSE, Plot_Two}
+ggplot(aes(y = alcohol,x = QualityCategory),data = WhiteWines) + geom_boxplot() + geom_smooth(method = 'lm')+ 
+  ggtitle("Distribution of alchohol percentage by wine quality.")
 
 ```
 
+
 ### Description Two
+
+We got that it has a strong relationship beetween Quality of a Wine and alchol.As alcohol percentage increases so tend to increase the quality. Although the relationship is not 100% take level 5 per exmple where we have a mean leass than the 4 level of quality.
 
 
 ### Plot Three
 Category and Alcohol and Density plot
 ```{r echo=FALSE, Plot_Three}
-
+p <- ggplot(aes(y = density,x = alcohol,color= QualityCategory),data = WhiteWines) + geom_point(alpha=0.5, size=0.2,position='jitter') + scale_y_continuous(limits = c(0.985,1.00))
+p + facet_grid(QualityCategory ~ ., scales="free")+ ggtitle('Density by Alcohol in differents Qualities')
 ```
 
 ### Description Three
-
+In this graph we compare two,density and alchol, variables correlated to quality of the wine.
+In this plot you can see that as the quality increases there are more alcohol at higher levels and lower densities.
 ------
 
 # Reflection
 
-> **Tip**: Here's the final step! Reflect on the exploration you performed and
-the insights you found. What were some of the struggles that you went through?
-What went well? What was surprising? Make sure you include an insight into
-future work that could be done with the dataset.
+We got that features that are strong related to wine are alcohol, density and chlorides. Quality is proportinaly related to alcohol and inverse to density and chlorides. 
+A suggestion to inprove the dataset will be to take into account wines from differents parts of the world. In this case of study were only considered wines from Portugal. By doing so, we can remove some bias.
 
-> **Tip**: Don't forget to remove this, and the other **Tip** sections before
-saving your final work and knitting the final report!
+
